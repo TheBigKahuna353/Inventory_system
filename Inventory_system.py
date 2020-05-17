@@ -6,6 +6,7 @@ pygame.init()
 
 screen = pygame.display.set_mode((500,500))
 
+#these are the images that get shown as items, different color circle for each item
 items = [pygame.Surface((50,50),pygame.SRCALPHA) for x in range(4)]
 pygame.draw.circle(items[0],(255,0,0),(25,25),25)
 pygame.draw.circle(items[1],(0,255,0),(25,25),25)
@@ -14,6 +15,7 @@ pygame.draw.circle(items[3],(0,0,255),(25,25),25)
 
 font = pygame.font.Font(pygame.font.match_font("calibri"),26)
 
+#class for a item, just holds the surface and can resize it
 class Item:
     def __init__(self,id):
         self.id = id
@@ -22,6 +24,7 @@ class Item:
     def resize(self,size):
         return pygame.transform.scale(self.surface,(size,size))
 
+#the inventory system
 class Inventory:
     def __init__(self):
         self.rows = 3
@@ -32,7 +35,9 @@ class Inventory:
         self.y = 50
         self.border = 3
     
+    #draw everything
     def draw(self):
+        #draw background
         pygame.draw.rect(screen,(100,100,100),
                          (self.x,self.y,(self.box_size + self.border)*self.col + self.border,(self.box_size + self.border)*self.rows + self.border))
         for x in range(self.col):
@@ -43,7 +48,8 @@ class Inventory:
                     screen.blit(self.items[x][y][0].resize(self.box_size),rect)
                     obj = font.render(str(self.items[x][y][1]),True,(0,0,0))
                     screen.blit(obj,(rect[0] + self.box_size//2, rect[1] + self.box_size//2))
-        
+                    
+    #get the square that the mouse is over
     def Get_pos(self):
         mouse = pygame.mouse.get_pos()
         
@@ -53,6 +59,7 @@ class Inventory:
         y = y//(self.box_size + self.border)
         return (x,y)
     
+    #add an item/s
     def Add(self,Item,xy):
         x, y = xy
         if self.items[x][y]:
@@ -64,7 +71,8 @@ class Inventory:
                 return temp
         else:
             self.items[x][y] = Item
-        
+    
+    #check whether the mouse in in the grid
     def In_grid(self,x,y):
         if 0 > x > self.col-1:
             return False
@@ -75,19 +83,23 @@ class Inventory:
     
 player_inventory = Inventory()
 
+#what the player is holding
 selected = None
 
 running = True
 while running:
+    #draw the screen
     screen.fill((255,255,255))
     player_inventory.draw()
     
     mousex, mousey = pygame.mouse.get_pos()
     
+    #if holding something, draw it next to mouse
     if selected:
         screen.blit(selected[0].resize(30),(mousex,mousey))
         obj = font.render(str(selected[1]),True,(0,0,0))
         screen.blit(obj,(mousex + 15, mousey + 15))        
+    
     
     pygame.display.update()
     for e in pygame.event.get():
@@ -95,6 +107,7 @@ while running:
             running = False
             pygame.quit()
         if e.type == pygame.MOUSEBUTTONDOWN:
+            #if right clicked, get a random item
             if e.button == 3:
                 selected = [Item(random.randint(0,3)),1]
             elif e.button == 1:
